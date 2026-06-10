@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои хроники · Журнал Oleg Borisov</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c8a04a; --gold-bright:#e6c66e; --gold-deep:#8a6d2f;
+  --parch:#efe2c0; --ink:#2b2113; --ink-soft:#5a4827;
+  --red:#9d2b2b; --red-bright:#c0392b; --blue:#2c5d8f; --blue-bright:#3a78b5;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;
+  font-family:'EB Garamond',Georgia,serif;
+  color:var(--ink);
+  background:radial-gradient(130% 90% at 50% -10%,#33555f 0%,#1b2c33 32%,#0d141a 66%,#070a0d 100%) fixed;
+  padding:18px;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+main,.topbar,.foot{position:relative;z-index:1}
+
+/* ---------- Panels ---------- */
+.panel{
+  background:linear-gradient(160deg,#f1e4c4,#e2d09f);
+  border:1px solid var(--gold-deep);border-radius:12px;padding:18px 20px;
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,.25),inset 0 0 0 5px var(--gold),0 12px 30px rgba(0,0,0,.45);
+}
+.panel-dark{
+  background:linear-gradient(180deg,#161d22,#0e1419);
+  border:1px solid var(--gold-deep);border-radius:12px;
+  box-shadow:inset 0 0 0 4px rgba(200,160,74,.10),0 10px 30px rgba(0,0,0,.55);
+}
+.hd{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.hd::before,.hd::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--gold-deep),transparent)}
+.hd span{font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.18em;font-weight:700;font-size:14px;color:var(--ink-soft);white-space:nowrap}
+.hd span::before{content:"❖ ";color:var(--gold-deep)}
+.hd span::after{content:" ❖";color:var(--gold-deep)}
+
+/* ---------- Topbar ---------- */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;max-width:1120px;margin:0 auto;padding:14px 24px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-orn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#161d22;font-size:22px;
+  background:radial-gradient(circle at 50% 35%,#f6e7b8,#cda545);box-shadow:inset 0 0 0 2px #fff6d8,inset 0 0 0 4px var(--gold-deep)}
+.brand-title{font-family:'Cinzel',serif;font-weight:800;letter-spacing:.16em;color:var(--gold-bright);font-size:21px;line-height:1}
+.brand-sub{font-family:'EB Garamond',serif;font-style:italic;color:#b9a877;font-size:13px;margin-top:3px}
+.clock-wrap{text-align:right}
+.clock{font-family:'Cinzel',serif;font-weight:800;font-size:36px;color:var(--gold-bright);line-height:1;text-shadow:0 0 16px rgba(200,160,74,.45)}
+.clock-sub{font-size:13px;color:#b9a877;font-style:italic;margin-top:4px}
+.clock-sub b{color:#d8c490;font-weight:600;font-style:normal}
+
+/* ---------- Layout ---------- */
+main{max-width:1120px;margin:18px auto 0;display:flex;flex-direction:column;gap:18px}
+.hero-row{display:grid;grid-template-columns:212px 1fr 272px;gap:18px;align-items:stretch}
+@media(max-width:980px){.hero-row{grid-template-columns:1fr}.cal-panel{max-width:360px;margin-left:auto;margin-right:auto}}
+
+/* ---------- Calendar ---------- */
+.cal-month{text-align:center;font-family:'Cinzel',serif;text-transform:capitalize;font-weight:700;color:var(--ink);margin-bottom:10px;font-size:14px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-grid .dow{font-family:'Cinzel',serif;font-size:10px;text-align:center;color:var(--ink-soft);padding-bottom:3px;letter-spacing:.04em}
+.cal-grid .day{aspect-ratio:1;display:grid;place-items:center;font-size:12.5px;border-radius:6px;color:var(--ink)}
+.cal-grid .day.we{color:#9d2b2b}
+.cal-grid .day.today{background:radial-gradient(circle,#cda545,#a9842f);color:#fff;font-weight:700;box-shadow:0 0 10px rgba(200,160,74,.75)}
+
+/* ---------- Hero / character ---------- */
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.hero-frame{position:relative;width:100%;max-width:360px;aspect-ratio:3/4;border-radius:18px;overflow:hidden;cursor:pointer;background:#140d08;
+  box-shadow:inset 0 0 0 3px var(--gold),inset 0 0 0 6px rgba(0,0,0,.4),inset 0 0 70px rgba(0,0,0,.6),0 16px 40px rgba(0,0,0,.6)}
+.portrait{position:absolute;inset:0}
+.portrait svg,.portrait img{width:100%;height:100%;display:block;object-fit:cover}
+.hero-embers{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ember{position:absolute;bottom:-8px;width:3px;height:3px;border-radius:50%;background:#ffb347;box-shadow:0 0 7px 1px #ff8c1a;opacity:0;animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}12%{opacity:.9}100%{transform:translateY(-300px) translateX(var(--dx)) scale(.2);opacity:0}}
+.hero-name{font-family:'Cinzel',serif;font-weight:800;letter-spacing:.14em;color:var(--gold-bright);margin-top:14px;font-size:21px;text-align:center}
+.hero-tag{font-family:'EB Garamond',serif;font-style:italic;color:#b9a877;font-size:14px}
+.hero-hint{font-size:11px;color:#8b7d58;margin-top:8px;text-align:center}
+.hero-upload{margin-top:4px;background:none;border:none;color:#b9a877;text-decoration:underline;cursor:pointer;font-family:'EB Garamond',serif;font-size:12px}
+
+/* ---------- Stats ---------- */
+.overall{display:flex;flex-direction:column;align-items:center;margin-bottom:16px}
+.overall-label{font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--ink-soft);margin-bottom:7px}
+.overall-badge{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;font-family:'Cinzel',serif;font-weight:800;font-size:36px;color:#5a431a;
+  background:radial-gradient(circle at 50% 35%,#f6e7b8,#cda545);box-shadow:inset 0 0 0 3px #fff6d8,inset 0 0 0 5px var(--gold-deep),0 6px 16px rgba(0,0,0,.3)}
+.stat-list{display:flex;flex-direction:column;gap:8px}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border:1px solid rgba(138,109,47,.45);border-radius:8px;
+  background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(180,150,80,.06))}
+.stat-row .name{font-family:'Cinzel',serif;font-size:12.5px;letter-spacing:.05em;color:var(--ink)}
+.stat-row .lvl{font-family:'Cinzel',serif;font-weight:800;font-size:22px;color:var(--gold-deep);line-height:1}
+.stat-row .lvl small{font-size:10px;font-weight:700;opacity:.7;letter-spacing:.05em}
+
+/* ---------- Vitals ---------- */
+.vitals-grid{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:20px;align-items:start}
+@media(max-width:820px){.vitals-grid{grid-template-columns:1fr}}
+.vital-label{font-family:'Cinzel',serif;font-size:12.5px;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:8px;text-transform:uppercase}
+.vital-num{font-family:'Cinzel',serif;font-weight:800;font-size:14px;color:var(--ink);margin-left:4px}
+.bar{display:flex;gap:4px}
+.seg{flex:1;height:30px;border-radius:5px;border:1px solid rgba(0,0,0,.28);cursor:pointer;background:rgba(60,40,20,.16);transition:transform .06s,background .12s}
+.seg:hover{transform:translateY(-2px)}
+.seg.health.on{background:linear-gradient(180deg,#c0392b,#7d1d1d);box-shadow:inset 0 1px 2px rgba(255,255,255,.35),0 0 9px rgba(192,57,43,.55)}
+.seg.mana.on{background:linear-gradient(180deg,#3a78b5,#1f4a78);box-shadow:inset 0 1px 2px rgba(255,255,255,.35),0 0 9px rgba(58,120,181,.55)}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.mood{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;border:1px solid rgba(138,109,47,.45);border-radius:9px;background:rgba(255,255,255,.2);cursor:pointer;transition:transform .06s}
+.mood:hover{transform:translateY(-2px)}
+.mood .emj{font-size:23px;line-height:1}
+.mood .mlabel{font-size:10px;font-family:'Cinzel',serif;letter-spacing:.02em;color:var(--ink-soft)}
+.mood.on{background:radial-gradient(circle,#f6e7b8,#e7cf8f);box-shadow:inset 0 0 0 2px var(--gold-deep),0 0 12px rgba(200,160,74,.6)}
+.comment-row{margin-top:18px}
+.comment-row label{display:block;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.05em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:7px}
+.comment-row .muted{font-family:'EB Garamond',serif;text-transform:none;letter-spacing:0;font-style:italic;color:#8b7d58;font-size:13px}
+
+/* ---------- Forms / buttons ---------- */
+input,select,textarea{font-family:'EB Garamond',serif;font-size:15px;color:var(--ink);background:linear-gradient(180deg,#fbf3da,#f0e3bf);border:1px solid var(--gold-deep);border-radius:8px;padding:10px 12px;outline:none}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 2px rgba(200,160,74,.55)}
+textarea{width:100%;resize:vertical}
+.btn{font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-size:13px;color:#3a2c12;cursor:pointer;
+  background:linear-gradient(180deg,#f0d98e,#cda545);border:1px solid var(--gold-deep);border-radius:8px;padding:0 18px;height:42px;
+  box-shadow:0 3px 0 #8a6d2f,0 5px 12px rgba(0,0,0,.25)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #8a6d2f}
+.act-form{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.act-form .f-name{flex:1;min-width:190px;display:flex}
+.act-form .f-name input{flex:1}
+.act-form select{min-width:155px}
+.f-amt{display:flex;align-items:center;gap:6px}
+.f-amt label{font-family:'Cinzel',serif;font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+.f-amt input{width:74px;text-align:center}
+.form-hint{font-size:12.5px;font-style:italic;color:#8b7d58;margin-top:9px}
+
+/* ---------- Activity / history rows ---------- */
+.act-list,.hist-list{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.act-row{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid rgba(138,109,47,.45);border-radius:9px;
+  background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(180,150,80,.05))}
+.act-row.editing{background:linear-gradient(180deg,#fbf3da,#efe1bb);flex-wrap:wrap}
+.act-main{flex:1;min-width:0}
+.act-name{font-weight:600;font-size:16px;overflow-wrap:anywhere}
+.act-meta{font-size:12.5px;color:var(--ink-soft);font-style:italic;margin-top:2px}
+.act-gain{font-family:'Cinzel',serif;font-weight:800;color:var(--gold-deep);font-size:19px;min-width:52px;text-align:right;white-space:nowrap}
+.act-btns{display:flex;gap:6px}
+.act-row .ed-name{flex:1;min-width:160px}
+.act-row .ed-amt{width:74px;text-align:center}
+.mini{border:1px solid var(--gold-deep);background:rgba(255,255,255,.35);border-radius:6px;min-width:32px;height:32px;cursor:pointer;font-size:14px;display:grid;place-items:center;color:var(--ink)}
+.mini:hover{background:var(--gold-bright)}
+.mini.del:hover{background:#d98a8a;border-color:#9d2b2b}
+
+.hist-row{display:grid;grid-template-columns:170px auto 1fr 32px;gap:12px;align-items:center;padding:11px 13px;border:1px solid rgba(138,109,47,.45);border-radius:9px;
+  background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(180,150,80,.05))}
+@media(max-width:720px){.hist-row{grid-template-columns:1fr;gap:6px}}
+.hist-date{font-family:'Cinzel',serif;font-size:12.5px;color:var(--ink);text-transform:capitalize;line-height:1.3}
+.hist-stats{display:flex;gap:7px;flex-wrap:wrap}
+.pill{font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid rgba(0,0,0,.12);white-space:nowrap}
+.pill.hp{background:rgba(192,57,43,.16);color:#7d1d1d}
+.pill.mp{background:rgba(58,120,181,.16);color:#1f4a78}
+.pill.mdp{background:rgba(200,160,74,.18);color:var(--ink)}
+.hist-comment{font-size:14px;color:var(--ink);overflow-wrap:anywhere}
+.hist-comment i{color:#8b7d58}
+
+.empty{text-align:center;font-style:italic;color:#8b7d58;padding:18px 8px;font-size:15px}
+.foot{max-width:1120px;margin:22px auto 6px;text-align:center;color:#6f7e86;font-style:italic;font-size:12.5px;letter-spacing:.03em}
+.foot a{color:#9fb0b8;text-decoration:underline}
+
+/* ---------- Inventory ---------- */
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:9px}
+.inv-cell{aspect-ratio:1;border:1px solid rgba(138,109,47,.45);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .06s,box-shadow .12s;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(180,150,80,.06))}
+.inv-cell:hover{transform:translateY(-2px);box-shadow:0 0 12px rgba(200,160,74,.45)}
+.inv-cell .ic{font-size:30px;line-height:1}
+.inv-cell .nm{display:none}
+.inv-cell.empty{border-style:dashed;background:rgba(255,255,255,.10);padding:0}
+.inv-cell.empty .plus{font-size:26px;color:#b29b63;font-weight:300}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(8,6,4,.72);display:flex;align-items:center;justify-content:center;padding:18px}
+.modal[hidden]{display:none}
+.modal-card{width:min(440px,100%)}
+.icon-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.icon-opt{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;border:1px solid rgba(138,109,47,.45);border-radius:9px;cursor:pointer;background:rgba(255,255,255,.2);transition:transform .06s}
+.icon-opt:hover{transform:translateY(-2px)}
+.icon-opt .ic{font-size:26px;line-height:1}
+.icon-opt .nm{font-size:10px;font-family:'Cinzel',serif;color:var(--ink-soft);letter-spacing:.02em;text-align:center}
+.icon-opt.sel{background:radial-gradient(circle,#f6e7b8,#e7cf8f);box-shadow:inset 0 0 0 2px var(--gold-deep),0 0 10px rgba(200,160,74,.6)}
+.modal-card input{width:100%}
+.modal-actions{display:flex;gap:9px;align-items:center;margin-top:14px}
+.modal-actions .btn{flex:1}
+.ghost-btn{background:rgba(255,255,255,.25);border:1px solid var(--gold-deep);border-radius:8px;height:42px;padding:0 16px;font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700;color:var(--ink-soft);cursor:pointer}
+.ghost-btn:hover{background:var(--gold-bright)}
+.ghost-btn.danger{color:#7d1d1d;border-color:#9d2b2b}
+.ghost-btn.danger:hover{background:#d98a8a}
+</style>
+</head>
+<body>
+
+<header class="topbar panel-dark">
+  <div class="brand">
+    <div class="brand-orn">✦</div>
+    <div>
+      <div class="brand-title">МОИ ХРОНИКИ</div>
+      <div class="brand-sub">журнал активностей · Oleg Borisov</div>
+    </div>
+  </div>
+  <div class="clock-wrap">
+    <div id="clock" class="clock">00:00</div>
+    <div class="clock-sub"><b>Москва</b> · <span id="clockDate">—</span></div>
+  </div>
+</header>
+
+<main>
+  <!-- ===== Character row ===== -->
+  <section class="hero-row">
+    <div class="panel cal-panel">
+      <div class="hd"><span>Календарь</span></div>
+      <div id="calMonth" class="cal-month">—</div>
+      <div id="calGrid" class="cal-grid"></div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-frame" id="heroFrame" title="Нажмите, чтобы загрузить своё фото">
+        <div class="portrait" id="portrait"></div>
+        <div class="hero-embers" id="embers"></div>
+      </div>
+      <div class="hero-name">Lucky Wizard</div>
+      <div class="hero-tag">«Везучий волшебник»</div>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+      <button id="removePortrait" class="hero-upload" hidden>← вернуть силуэт</button>
+      <div class="hero-hint" id="uploadHint">нажмите на портрет, чтобы загрузить своё фото</div>
+    </div>
+
+    <div class="panel stats-panel">
+      <div class="hd"><span>Характеристики</span></div>
+      <div class="overall">
+        <div class="overall-label">Общий уровень</div>
+        <div class="overall-badge"><span id="overall">0</span></div>
+      </div>
+      <div id="statList" class="stat-list"></div>
+    </div>
+  </section>
+
+  <!-- ===== Vitals ===== -->
+  <section class="panel">
+    <div class="hd"><span>Состояние</span></div>
+    <div class="vitals-grid">
+      <div class="vital">
+        <div class="vital-label">Здоровье <span id="healthVal" class="vital-num"></span></div>
+        <div id="healthBar" class="bar"></div>
+      </div>
+      <div class="vital">
+        <div class="vital-label">Уровень энергии <span id="manaVal" class="vital-num"></span></div>
+        <div id="manaBar" class="bar"></div>
+      </div>
+      <div class="vital">
+        <div class="vital-label">Настроение</div>
+        <div id="moodBar" class="mood-grid"></div>
+      </div>
+    </div>
+    <div class="comment-row">
+      <label for="comment">Комментарий <span class="muted">— почему такие показатели (сохранится в истории)</span></label>
+      <textarea id="comment" rows="2" placeholder="Напр.: мало спал, но отлично потренировался…"></textarea>
+    </div>
+  </section>
+
+  <!-- ===== Activities ===== -->
+  <section class="panel">
+    <div class="hd"><span>Активности</span></div>
+    <div class="act-form">
+      <div class="f-name"><input id="actName" type="text" placeholder="Что вы сделали? Напр. «Пробежка 5 км»"></div>
+      <select id="actStat"></select>
+      <div class="f-amt"><label for="actAmt">+ур.</label><input id="actAmt" type="number" min="1" step="1" value="1"></div>
+      <button id="actAdd" class="btn">Получить уровень</button>
+    </div>
+    <div class="form-hint">Выберите характеристику и на сколько прокачался уровень. Записи можно редактировать ✎ или удалять 🗑.</div>
+    <div id="actList" class="act-list"></div>
+  </section>
+
+  <!-- ===== Inventory ===== -->
+  <section class="panel">
+    <div class="hd"><span>Инвентарь</span></div>
+    <div class="form-hint" style="margin-top:0;margin-bottom:14px">Нажмите на пустой квадрат, чтобы добавить предмет: выберите иконку и впишите название. Наведите на предмет — покажется его имя.</div>
+    <div id="invGrid" class="inv-grid"></div>
+  </section>
+
+  <!-- ===== History ===== -->
+  <section class="panel">
+    <div class="hd"><span>Моя история</span></div>
+    <div id="historyList" class="hist-list"></div>
+  </section>
+</main>
+
+<!-- ===== Item modal ===== -->
+<div id="itemModal" class="modal" hidden>
+  <div class="panel modal-card">
+    <div class="hd"><span id="itemModalTitle">Новый предмет</span></div>
+    <div id="iconPicker" class="icon-picker"></div>
+    <input id="itemName" type="text" maxlength="40" placeholder="Название предмета (напр. «Меч из Колумбии»)">
+    <div class="modal-actions">
+      <button id="itemSave" class="btn">Сохранить</button>
+      <button id="itemDelete" class="ghost-btn danger" hidden>Удалить</button>
+      <button id="itemCancel" class="ghost-btn">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">Все данные хранятся только в вашем браузере · Columbia, 1912 · <a href="mobile.html">📱 Версия для телефона</a></footer>
+
+<script>
+"use strict";
+
+/* ---------- Meta ---------- */
+const KEY = 'booker_tracker_v1';
+const STATS = [
+  {key:'intellect',  label:'Интеллект'},
+  {key:'strength',   label:'Сила'},
+  {key:'endurance',  label:'Выносливость'},
+  {key:'agility',    label:'Ловкость'},
+  {key:'craft',      label:'Ремесло'},
+  {key:'eloquence',  label:'Красноречие'},
+];
+const MOODS = [
+  {key:'joy',       emoji:'😄', label:'Радость'},
+  {key:'sadness',   emoji:'😢', label:'Грусть'},
+  {key:'anger',     emoji:'😠', label:'Гнев'},
+  {key:'happiness', emoji:'🥰', label:'Счастье'},
+  {key:'calm',      emoji:'😌', label:'Спокойствие'},
+  {key:'anxiety',   emoji:'😰', label:'Тревога'},
+];
+const ITEMS = [
+  {key:'armor',   emoji:'🛡️', label:'Броня'},
+  {key:'weapon',  emoji:'⚔️', label:'Оружие'},
+  {key:'clothes', emoji:'🧥', label:'Одежда'},
+  {key:'jewelry', emoji:'💍', label:'Украшение'},
+  {key:'gold',    emoji:'🪙', label:'Золото'},
+  {key:'diamond', emoji:'💎', label:'Бриллиант'},
+  {key:'alchemy', emoji:'⚗️', label:'Алхимия'},
+  {key:'wood',    emoji:'🪵', label:'Дерево'},
+];
+
+/* ---------- Silhouette ---------- */
+const SILHOUETTE = `
+<svg viewBox="0 0 300 460" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="40%" r="62%">
+      <stop offset="0%" stop-color="#8a531f"/><stop offset="45%" stop-color="#3a2412"/><stop offset="100%" stop-color="#120c07"/>
+    </radialGradient>
+    <linearGradient id="sil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#15110b"/><stop offset="100%" stop-color="#060503"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="460" fill="url(#glow)"/>
+  <g fill="url(#sil)">
+    <path d="M120,250 L108,452 L142,452 L148,300 L152,300 L158,452 L192,452 L180,250 Z"/>
+    <path d="M112,248 C104,205 104,150 120,122 L180,122 C196,150 196,205 188,248 Z"/>
+    <path d="M104,140 C124,112 176,112 196,140 L188,124 L112,124 Z"/>
+    <rect x="138" y="104" width="24" height="22"/>
+    <ellipse cx="150" cy="84" rx="25" ry="29"/>
+    <path d="M125,80 C122,54 178,54 175,80 C178,64 168,50 150,50 C132,50 122,64 125,80 Z"/>
+    <path d="M116,132 C92,150 84,182 96,206 L114,198 C104,178 110,150 130,140 Z"/>
+    <path d="M188,134 C200,160 200,205 188,236 L172,232 C182,205 182,162 174,140 Z"/>
+  </g>
+  <path d="M138,124 L162,124 L156,152 L150,140 L144,152 Z" fill="#9d2b2b"/>
+  <g transform="rotate(-33 150 130)">
+    <rect x="58" y="119" width="48" height="25" rx="8" fill="#0c0905"/>
+    <rect x="100" y="124" width="152" height="15" rx="6" fill="#0c0905"/>
+    <rect x="152" y="126" width="104" height="9" rx="4" fill="#0a0704"/>
+  </g>
+  <ellipse cx="120" cy="150" rx="11" ry="9" fill="#15110b"/>
+</svg>`;
+
+/* ---------- Moscow date/time helpers ---------- */
+const MSK = 'Europe/Moscow';
+function fmt(opts, d){ return new Intl.DateTimeFormat('ru-RU', Object.assign({timeZone:MSK}, opts)).format(d || new Date()); }
+function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function moscowDateKey(d){
+  const p = new Intl.DateTimeFormat('en-CA',{timeZone:MSK,year:'numeric',month:'2-digit',day:'2-digit'}).format(d || new Date());
+  return p; // YYYY-MM-DD
+}
+function moscowParts(d){
+  const o = {};
+  new Intl.DateTimeFormat('en-CA',{timeZone:MSK,year:'numeric',month:'2-digit',day:'2-digit'})
+    .formatToParts(d || new Date()).forEach(x => o[x.type] = x.value);
+  return {year:+o.year, month:+o.month, day:+o.day};
+}
+function fmtMoscowDateTime(ts){ return fmt({day:'numeric',month:'long',hour:'2-digit',minute:'2-digit',hour12:false}, new Date(ts)); }
+
+/* ---------- State ---------- */
+function defaultState(){
+  return {
+    stats:{intellect:0,strength:0,endurance:0,agility:0,craft:0,eloquence:0},
+    health:10, mana:10, mood:'calm', comment:'',
+    activities:[], history:[], inventory:[], portrait:null
+  };
+}
+let state = load();
+function load(){
+  try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s){ const d = defaultState(); return Object.assign(d, s, {stats:Object.assign(d.stats, s.stats||{})}); } }catch(e){}
+  return defaultState();
+}
+let saveTimer;
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(()=>{ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ alert('Не удалось сохранить (возможно, фото слишком большое).'); } }, 150); }
+
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+const $ = id => document.getElementById(id);
+
+/* ---------- Overall + stats ---------- */
+function overallLevel(){ return STATS.reduce((s,m)=> s + (state.stats[m.key]||0), 0); }
+function renderStats(){
+  $('overall').textContent = overallLevel();
+  $('statList').innerHTML = STATS.map(m =>
+    `<div class="stat-row"><span class="name">${m.label}</span><span class="lvl">${state.stats[m.key]||0}<small> ур.</small></span></div>`
+  ).join('');
+}
+
+/* ---------- Vitals: health / mana ---------- */
+function renderBars(){
+  $('healthVal').textContent = state.health + '/10';
+  $('manaVal').textContent   = state.mana   + '/10';
+  buildBar('healthBar','health');
+  buildBar('manaBar','mana');
+}
+function buildBar(containerId, type){
+  const c = $(containerId); c.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const seg = document.createElement('button');
+    seg.className = 'seg ' + type + (i <= state[type] ? ' on' : '');
+    seg.setAttribute('aria-label', type + ' ' + i);
+    seg.onclick = () => {
+      const cur = state[type];
+      state[type] = (cur === i) ? i-1 : i;   // click the topmost filled to step down
+      touchHistory(); save(); renderBars(); renderHistory();
+    };
+    c.appendChild(seg);
+  }
+}
+
+/* ---------- Vitals: mood ---------- */
+function renderMood(){
+  const c = $('moodBar'); c.innerHTML='';
+  MOODS.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'mood' + (state.mood === m.key ? ' on' : '');
+    b.innerHTML = `<span class="emj">${m.emoji}</span><span class="mlabel">${m.label}</span>`;
+    b.onclick = () => { state.mood = m.key; touchHistory(); save(); renderMood(); renderHistory(); };
+    c.appendChild(b);
+  });
+}
+
+/* ---------- History (per day) ---------- */
+let histRenderTimer;
+function touchHistory(){
+  const key = moscowDateKey();
+  let e = state.history.find(h => h.date === key);
+  if(!e){ e = {date:key, ts:Date.now()}; state.history.push(e); }
+  e.health = state.health; e.mana = state.mana; e.mood = state.mood; e.comment = state.comment;
+  e.dateHuman = cap(fmt({weekday:'long', day:'numeric', month:'long', year:'numeric'}));
+}
+function renderHistory(){
+  const list = $('historyList');
+  const items = [...state.history].sort((a,b)=> a.date < b.date ? 1 : -1);
+  if(!items.length){ list.innerHTML = '<div class="empty">История пуста. Отметьте здоровье, энергию и настроение — день сохранится здесь.</div>'; return; }
+  list.innerHTML = '';
+  items.forEach(h => {
+    const m = MOODS.find(x => x.key === h.mood);
+    const row = document.createElement('div'); row.className = 'hist-row';
+    row.innerHTML =
+      `<div class="hist-date">${esc(h.dateHuman || h.date)}</div>
+       <div class="hist-stats">
+         <span class="pill hp">❤ ${h.health}/10</span>
+         <span class="pill mp">⚡ ${h.mana}/10</span>
+         <span class="pill mdp">${m ? m.emoji + ' ' + m.label : '—'}</span>
+       </div>
+       <div class="hist-comment">${h.comment ? esc(h.comment) : '<i>без комментария</i>'}</div>
+       <button class="mini del" title="Удалить запись">🗑</button>`;
+    row.querySelector('.del').onclick = () => {
+      if(confirm('Удалить запись за ' + (h.dateHuman || h.date) + '?')){
+        state.history = state.history.filter(x => x.date !== h.date); save(); renderHistory();
+      }
+    };
+    list.appendChild(row);
+  });
+}
+
+/* ---------- Activities ---------- */
+let editingId = null;
+function addActivity(){
+  const name = $('actName').value.trim();
+  const stat = $('actStat').value;
+  let amt = parseInt($('actAmt').value, 10);
+  if(!name){ $('actName').focus(); $('actName').style.boxShadow = '0 0 0 2px #c0392b'; setTimeout(()=>$('actName').style.boxShadow='',900); return; }
+  if(!amt || amt < 1) amt = 1;
+  state.activities.push({id:uid(), ts:Date.now(), name, stat, amount:amt});
+  state.stats[stat] = (state.stats[stat]||0) + amt;
+  $('actName').value=''; $('actAmt').value='1';
+  save(); renderStats(); renderActivities(); $('actName').focus();
+}
+function removeActivity(id){
+  const a = state.activities.find(x => x.id === id); if(!a) return;
+  state.stats[a.stat] = Math.max(0, (state.stats[a.stat]||0) - a.amount);
+  state.activities = state.activities.filter(x => x.id !== id);
+  save(); renderStats(); renderActivities();
+}
+function renderActivities(){
+  const list = $('actList');
+  if(!state.activities.length){ list.innerHTML = '<div class="empty">Пока нет активностей. Добавьте первую — и прокачайте героя.</div>'; return; }
+  list.innerHTML = '';
+  [...state.activities].sort((a,b)=> b.ts - a.ts).forEach(a => {
+    const row = document.createElement('div'); row.className = 'act-row';
+    if(editingId === a.id){
+      row.classList.add('editing');
+      row.innerHTML =
+        `<input class="ed-name" value="${esc(a.name)}">
+         <select class="ed-stat">${STATS.map(s=>`<option value="${s.key}" ${s.key===a.stat?'selected':''}>${s.label}</option>`).join('')}</select>
+         <div class="f-amt"><label>+ур.</label><input class="ed-amt" type="number" min="1" step="1" value="${a.amount}"></div>
+         <div class="act-btns">
+           <button class="mini" title="Сохранить">✔</button>
+           <button class="mini del" title="Отмена">✕</button>
+         </div>`;
+      const [saveBtn, cancelBtn] = row.querySelectorAll('.act-btns .mini');
+      saveBtn.onclick = () => {
+        const newName = row.querySelector('.ed-name').value.trim() || a.name;
+        const newStat = row.querySelector('.ed-stat').value;
+        let newAmt = parseInt(row.querySelector('.ed-amt').value, 10); if(!newAmt || newAmt < 1) newAmt = 1;
+        state.stats[a.stat] = Math.max(0, (state.stats[a.stat]||0) - a.amount); // revert old
+        a.name = newName; a.stat = newStat; a.amount = newAmt;
+        state.stats[newStat] = (state.stats[newStat]||0) + newAmt;             // apply new
+        editingId = null; save(); renderStats(); renderActivities();
+      };
+      cancelBtn.onclick = () => { editingId = null; renderActivities(); };
+    } else {
+      const st = STATS.find(s => s.key === a.stat);
+      row.innerHTML =
+        `<div class="act-main">
+           <div class="act-name">${esc(a.name)}</div>
+           <div class="act-meta">${fmtMoscowDateTime(a.ts)} · ${st ? st.label : ''}</div>
+         </div>
+         <div class="act-gain">+${a.amount}</div>
+         <div class="act-btns">
+           <button class="mini" title="Редактировать">✎</button>
+           <button class="mini del" title="Удалить">🗑</button>
+         </div>`;
+      const [editBtn, delBtn] = row.querySelectorAll('.act-btns .mini');
+      editBtn.onclick = () => { editingId = a.id; renderActivities(); };
+      delBtn.onclick = () => { if(confirm('Удалить активность «' + a.name + '»?')) removeActivity(a.id); };
+    }
+    list.appendChild(row);
+  });
+}
+
+/* ---------- Portrait ---------- */
+function renderPortrait(){
+  const p = $('portrait');
+  if(state.portrait){
+    p.innerHTML = `<img src="${state.portrait}" alt="Lucky Wizard">`;
+    $('removePortrait').hidden = false;
+    $('uploadHint').textContent = 'нажмите на портрет, чтобы заменить фото';
+  } else {
+    p.innerHTML = SILHOUETTE;
+    $('removePortrait').hidden = true;
+    $('uploadHint').textContent = 'нажмите на портрет, чтобы загрузить своё фото';
+  }
+}
+function handleFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 640, scale = Math.min(1, max / img.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      state.portrait = c.toDataURL('image/jpeg', 0.85);
+      save(); renderPortrait();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ---------- Calendar ---------- */
+function renderCalendar(){
+  const {year, month, day} = moscowParts();
+  $('calMonth').textContent = cap(fmt({month:'long', year:'numeric'})).replace(' г.', '');
+  const dows = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  let html = dows.map((d,i)=>`<div class="dow${i>=5?' we':''}">${d}</div>`).join('');
+  let startDow = (new Date(year, month-1, 1).getDay() + 6) % 7; // 0=Mon
+  const daysInMonth = new Date(year, month, 0).getDate();
+  for(let i=0;i<startDow;i++) html += '<div class="day"></div>';
+  for(let d=1; d<=daysInMonth; d++){
+    const dow = (startDow + d - 1) % 7;
+    const cls = 'day' + (dow>=5?' we':'') + (d===day?' today':'');
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  $('calGrid').innerHTML = html;
+}
+
+/* ---------- Clock ---------- */
+let lastDateKey = '';
+function renderClock(){
+  $('clock').textContent = fmt({hour:'2-digit', minute:'2-digit', hour12:false});
+  $('clockDate').textContent = cap(fmt({weekday:'short', day:'numeric', month:'long'}));
+  const k = moscowDateKey();
+  if(k !== lastDateKey){ lastDateKey = k; renderCalendar(); }
+}
+
+/* ---------- Embers ---------- */
+function buildEmbers(){
+  const c = $('embers');
+  for(let i=0;i<14;i++){
+    const s = document.createElement('span'); s.className = 'ember';
+    s.style.left = Math.random()*100 + '%';
+    s.style.setProperty('--dx', (Math.random()*60-30) + 'px');
+    s.style.animationDuration = (3.5 + Math.random()*4) + 's';
+    s.style.animationDelay = (-Math.random()*6) + 's';
+    c.appendChild(s);
+  }
+}
+
+/* ---------- Inventory ---------- */
+let modalKey = null, modalEditId = null;
+function renderInventory(){
+  const grid = $('invGrid');
+  const items = state.inventory || [];
+  const total = Math.max(8, Math.ceil((items.length + 1) / 4) * 4);
+  let html = '';
+  items.forEach(it => {
+    const meta = ITEMS.find(x => x.key === it.key) || ITEMS[0];
+    html += `<div class="inv-cell" data-id="${it.id}" title="${esc(it.name)}"><span class="ic">${meta.emoji}</span><span class="nm">${esc(it.name)}</span></div>`;
+  });
+  for(let i = items.length; i < total; i++){
+    html += `<div class="inv-cell empty add"><span class="plus">+</span></div>`;
+  }
+  grid.innerHTML = html;
+  grid.querySelectorAll('.inv-cell[data-id]').forEach(el => {
+    el.onclick = () => openItemModal(items.find(x => x.id === el.dataset.id));
+  });
+  grid.querySelectorAll('.inv-cell.add').forEach(el => {
+    el.onclick = () => openItemModal(null);
+  });
+}
+function openItemModal(item){
+  modalEditId = item ? item.id : null;
+  modalKey = item ? item.key : null;
+  $('itemModalTitle').textContent = item ? 'Изменить предмет' : 'Новый предмет';
+  $('itemName').value = item ? item.name : '';
+  $('itemDelete').hidden = !item;
+  $('iconPicker').innerHTML = ITEMS.map(x =>
+    `<button type="button" class="icon-opt${x.key === modalKey ? ' sel' : ''}" data-key="${x.key}"><span class="ic">${x.emoji}</span><span class="nm">${x.label}</span></button>`
+  ).join('');
+  $('iconPicker').querySelectorAll('.icon-opt').forEach(b => {
+    b.onclick = () => { modalKey = b.dataset.key; $('iconPicker').querySelectorAll('.icon-opt').forEach(o => o.classList.toggle('sel', o === b)); };
+  });
+  $('itemModal').hidden = false;
+  setTimeout(() => $('itemName').focus(), 30);
+}
+function closeItemModal(){ $('itemModal').hidden = true; modalEditId = null; modalKey = null; }
+function saveItem(){
+  const name = $('itemName').value.trim();
+  if(!modalKey){ $('iconPicker').style.boxShadow = '0 0 0 2px #c0392b'; setTimeout(() => $('iconPicker').style.boxShadow = '', 900); return; }
+  if(!name){ $('itemName').focus(); $('itemName').style.boxShadow = '0 0 0 2px #c0392b'; setTimeout(() => $('itemName').style.boxShadow = '', 900); return; }
+  if(modalEditId){
+    const it = state.inventory.find(x => x.id === modalEditId);
+    if(it){ it.key = modalKey; it.name = name; }
+  } else {
+    state.inventory.push({id:uid(), key:modalKey, name});
+  }
+  save(); renderInventory(); closeItemModal();
+}
+function deleteItem(){
+  if(modalEditId){ state.inventory = state.inventory.filter(x => x.id !== modalEditId); save(); renderInventory(); }
+  closeItemModal();
+}
+
+/* ---------- Wire up ---------- */
+$('actStat').innerHTML = STATS.map(s=>`<option value="${s.key}">${s.label}</option>`).join('');
+$('actAdd').onclick = addActivity;
+$('actName').addEventListener('keydown', e => { if(e.key === 'Enter') addActivity(); });
+$('comment').value = state.comment;
+$('comment').addEventListener('input', () => {
+  state.comment = $('comment').value; touchHistory(); save();
+  clearTimeout(histRenderTimer); histRenderTimer = setTimeout(renderHistory, 350);
+});
+$('heroFrame').onclick = () => $('fileInput').click();
+$('fileInput').addEventListener('change', e => handleFile(e.target.files[0]));
+$('removePortrait').onclick = (e) => { e.stopPropagation(); state.portrait = null; save(); renderPortrait(); };
+$('itemSave').onclick = saveItem;
+$('itemDelete').onclick = deleteItem;
+$('itemCancel').onclick = closeItemModal;
+$('itemModal').addEventListener('click', e => { if(e.target === $('itemModal')) closeItemModal(); });
+$('itemName').addEventListener('keydown', e => { if(e.key === 'Enter') saveItem(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('itemModal').hidden) closeItemModal(); });
+
+/* ---------- Init ---------- */
+function renderAll(){ renderStats(); renderBars(); renderMood(); renderActivities(); renderHistory(); renderInventory(); renderPortrait(); }
+buildEmbers();
+touchHistory();          // ensure today's snapshot exists
+save();
+renderClock(); renderCalendar(); renderAll();
+setInterval(renderClock, 1000);
+</script>
+</body>
+</html>
