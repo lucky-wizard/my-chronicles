@@ -165,6 +165,53 @@ textarea{width:100%;resize:vertical}
 .foot{max-width:1120px;margin:22px auto 6px;text-align:center;color:#6f7e86;font-style:italic;font-size:12.5px;letter-spacing:.03em}
 .foot a{color:#9fb0b8;text-decoration:underline}
 
+/* ---------- Tasks ---------- */
+.task-form{display:flex;gap:9px}
+.task-form input{flex:1}
+.task-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.task-row{display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid rgba(138,109,47,.45);border-radius:9px;background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(180,150,80,.05));transition:opacity .35s,transform .35s}
+.task-row.leaving{opacity:0;transform:translateX(24px)}
+.task-check{width:28px;height:28px;flex:0 0 auto;border-radius:7px;border:1px solid var(--gold-deep);background:rgba(255,255,255,.4);cursor:pointer;display:grid;place-items:center;color:#1f5610;font-weight:800;font-size:15px}
+.task-check.on{background:radial-gradient(circle,#bfe3b0,#7cc168);border-color:#3f7d2f}
+.task-text{flex:1;font-size:15px;overflow-wrap:anywhere}
+.task-row.done .task-text{text-decoration:line-through;color:#8b7d58}
+
+/* ---------- Level guide ---------- */
+.guide-list{display:flex;flex-direction:column;gap:10px}
+.guide-row{display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:start}
+.guide-name{font-family:'Cinzel',serif;font-size:13px;color:var(--ink);padding-top:10px}
+.guide-field{display:flex;gap:8px;align-items:stretch}
+.guide-field textarea{flex:1}
+
+/* ---------- Calendar events ---------- */
+.cal-grid .day[data-date]{cursor:pointer;position:relative;transition:background .12s}
+.cal-grid .day[data-date]:hover{background:rgba(200,160,74,.25)}
+.cal-grid .day.has-event::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#9d2b2b;box-shadow:0 0 4px rgba(157,43,43,.6)}
+.cal-grid .day.today.has-event::after{background:#fff;box-shadow:none}
+
+/* ---------- Chart + export ---------- */
+.chart-sub{font-family:'Cinzel',serif;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin:2px 0 10px}
+.bar-chart{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.bc-row{display:grid;grid-template-columns:118px 1fr 30px;gap:10px;align-items:center}
+.bc-name{font-family:'Cinzel',serif;font-size:12px;color:var(--ink)}
+.bc-track{height:15px;border-radius:8px;background:rgba(60,40,20,.14);border:1px solid rgba(138,109,47,.35);overflow:hidden}
+.bc-fill{height:100%;background:linear-gradient(90deg,#e6c66e,#8a6d2f);border-radius:8px;min-width:3px;transition:width .35s}
+.bc-val{font-family:'Cinzel',serif;font-weight:800;color:var(--gold-deep);font-size:15px;text-align:right}
+.chart-legend{display:flex;gap:16px;justify-content:center;margin-bottom:6px;font-size:13px;font-weight:600}
+.chart-legend .lg.h{color:#9d2b2b}
+.chart-legend .lg.e{color:#2c5d8f}
+.line-chart{width:100%;height:auto;background:rgba(255,255,255,.2);border:1px solid rgba(138,109,47,.35);border-radius:9px}
+.line-chart .grid{stroke:rgba(138,109,47,.3);stroke-width:1}
+.line-chart .ax{fill:#8b7d58;font-size:8px}
+.line-chart .xl{text-anchor:middle}
+.line-chart .ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.line-chart .ln.h{stroke:#c0392b}
+.line-chart .ln.e{stroke:#3a78b5}
+.line-chart .dot.h{fill:#c0392b}
+.line-chart .dot.e{fill:#3a78b5}
+.export-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.export-row .ghost-btn{height:42px}
+
 /* ---------- Inventory ---------- */
 .inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:9px}
 .inv-cell{aspect-ratio:1;border:1px solid rgba(138,109,47,.45);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .06s,box-shadow .12s;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(180,150,80,.06))}
@@ -263,6 +310,16 @@ textarea{width:100%;resize:vertical}
     </div>
   </section>
 
+  <!-- ===== Tasks ===== -->
+  <section class="panel">
+    <div class="hd"><span>Задания</span></div>
+    <div class="task-form">
+      <input id="taskInput" type="text" maxlength="120" placeholder="Новое задание себе…">
+      <button id="taskAdd" class="btn">Добавить</button>
+    </div>
+    <div id="taskList" class="task-list"></div>
+  </section>
+
   <!-- ===== Activities ===== -->
   <section class="panel">
     <div class="hd"><span>Активности</span></div>
@@ -274,6 +331,13 @@ textarea{width:100%;resize:vertical}
     </div>
     <div class="form-hint">Выберите характеристику и на сколько прокачался уровень. Записи можно редактировать ✎ или удалять 🗑.</div>
     <div id="actList" class="act-list"></div>
+  </section>
+
+  <!-- ===== Level guide ===== -->
+  <section class="panel">
+    <div class="hd"><span>Получение уровней</span></div>
+    <div class="form-hint" style="margin-top:0;margin-bottom:14px">Опишите, за что вы получаете уровни по каждому навыку. Текст можно менять и очищать.</div>
+    <div id="guideList" class="guide-list"></div>
   </section>
 
   <!-- ===== Inventory ===== -->
@@ -288,6 +352,18 @@ textarea{width:100%;resize:vertical}
     <div class="hd"><span>Моя история</span></div>
     <div id="historyList" class="hist-list"></div>
   </section>
+
+  <!-- ===== Statistics ===== -->
+  <section class="panel">
+    <div class="hd"><span>Статистика</span></div>
+    <div id="chart" class="chart"></div>
+    <div class="export-row">
+      <button id="exportJson" class="btn">Скачать данные (JSON)</button>
+      <button id="exportCsv" class="ghost-btn">Скачать историю (CSV)</button>
+      <button id="importBtn" class="ghost-btn">Загрузить данные</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden>
+    </div>
+  </section>
 </main>
 
 <!-- ===== Item modal ===== -->
@@ -300,6 +376,19 @@ textarea{width:100%;resize:vertical}
       <button id="itemSave" class="btn">Сохранить</button>
       <button id="itemDelete" class="ghost-btn danger" hidden>Удалить</button>
       <button id="itemCancel" class="ghost-btn">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Event modal ===== -->
+<div id="eventModal" class="modal" hidden>
+  <div class="panel modal-card">
+    <div class="hd"><span id="eventModalTitle">Событие</span></div>
+    <textarea id="eventText" rows="3" placeholder="Что за событие в этот день? (заметка)"></textarea>
+    <div class="modal-actions">
+      <button id="eventSave" class="btn">Сохранить</button>
+      <button id="eventDelete" class="ghost-btn danger" hidden>Удалить</button>
+      <button id="eventCancel" class="ghost-btn">Отмена</button>
     </div>
   </div>
 </div>
@@ -390,12 +479,13 @@ function defaultState(){
   return {
     stats:{intellect:0,strength:0,endurance:0,agility:0,craft:0,eloquence:0},
     health:10, mana:10, mood:'calm', comment:'',
+    tasks:[], levelGuide:{intellect:'',strength:'',endurance:'',agility:'',craft:'',eloquence:''}, calendarEvents:{},
     activities:[], history:[], inventory:[], portrait:null
   };
 }
 let state = load();
 function load(){
-  try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s){ const d = defaultState(); return Object.assign(d, s, {stats:Object.assign(d.stats, s.stats||{})}); } }catch(e){}
+  try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s){ const d = defaultState(); return Object.assign(d, s, {stats:Object.assign(d.stats, s.stats||{}), levelGuide:Object.assign(d.levelGuide, s.levelGuide||{}), calendarEvents:s.calendarEvents||{}, tasks:Array.isArray(s.tasks)?s.tasks:[]}); } }catch(e){}
   return defaultState();
 }
 let saveTimer;
@@ -412,6 +502,7 @@ function renderStats(){
   $('statList').innerHTML = STATS.map(m =>
     `<div class="stat-row"><span class="name">${m.label}</span><span class="lvl">${state.stats[m.key]||0}<small> ур.</small></span></div>`
   ).join('');
+  renderChart();
 }
 
 /* ---------- Vitals: health / mana ---------- */
@@ -420,6 +511,7 @@ function renderBars(){
   $('manaVal').textContent   = state.mana   + '/10';
   buildBar('healthBar','health');
   buildBar('manaBar','mana');
+  renderChart();
 }
 function buildBar(containerId, type){
   const c = $(containerId); c.innerHTML='';
@@ -591,10 +683,13 @@ function renderCalendar(){
   for(let i=0;i<startDow;i++) html += '<div class="day"></div>';
   for(let d=1; d<=daysInMonth; d++){
     const dow = (startDow + d - 1) % 7;
-    const cls = 'day' + (dow>=5?' we':'') + (d===day?' today':'');
-    html += `<div class="${cls}">${d}</div>`;
+    const key = year + '-' + p2(month) + '-' + p2(d);
+    const ev = state.calendarEvents[key];
+    const cls = 'day' + (dow>=5?' we':'') + (d===day?' today':'') + (ev?' has-event':'');
+    html += '<div class="' + cls + '" data-date="' + key + '"' + (ev ? ' title="' + esc(ev) + '"' : '') + '>' + d + '</div>';
   }
   $('calGrid').innerHTML = html;
+  $('calGrid').querySelectorAll('.day[data-date]').forEach(el => { el.onclick = () => openEventModal(el.dataset.date); });
 }
 
 /* ---------- Clock ---------- */
@@ -648,7 +743,7 @@ function openItemModal(item){
   $('itemName').value = item ? item.name : '';
   $('itemDelete').hidden = !item;
   $('iconPicker').innerHTML = ITEMS.map(x =>
-    `<button type="button" class="icon-opt${x.key === modalKey ? ' sel' : ''}" data-key="${x.key}"><span class="ic">${x.emoji}</span><span class="nm">${x.label}</span></button>`
+    `<button type="button" class="icon-opt${x.key === modalKey ? ' sel' : ''}" data-key="${x.key}" title="${x.label}"><span class="ic">${x.emoji}</span></button>`
   ).join('');
   $('iconPicker').querySelectorAll('.icon-opt').forEach(b => {
     b.onclick = () => { modalKey = b.dataset.key; $('iconPicker').querySelectorAll('.icon-opt').forEach(o => o.classList.toggle('sel', o === b)); };
@@ -674,6 +769,174 @@ function deleteItem(){
   closeItemModal();
 }
 
+/* ---------- Small helpers ---------- */
+function p2(n){ return String(n).padStart(2, '0'); }
+function dateKeyHuman(key){
+  const a = key.split('-'); const d = +a[2], mo = +a[1], y = +a[0];
+  const M = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  return d + ' ' + (M[mo-1] || '') + ' ' + y;
+}
+
+/* ---------- Tasks ---------- */
+const TASK_TTL = 5000; // мс после галочки до исчезновения
+function renderTasks(){
+  const list = $('taskList'); if(!list) return;
+  const tasks = state.tasks || [];
+  if(!tasks.length){ list.innerHTML = '<div class="empty">Заданий нет. Добавьте, что хотите выполнить.</div>'; return; }
+  list.innerHTML = '';
+  tasks.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'task-row' + (t.done ? ' done' : '');
+    row.dataset.id = t.id;
+    row.innerHTML =
+      `<button class="task-check${t.done?' on':''}" title="Выполнено">${t.done?'✓':''}</button>
+       <span class="task-text">${esc(t.text)}</span>
+       <button class="mini del" title="Удалить">🗑</button>`;
+    row.querySelector('.task-check').onclick = () => toggleTask(t.id);
+    row.querySelector('.del').onclick = () => { state.tasks = state.tasks.filter(x => x.id !== t.id); save(); renderTasks(); };
+    list.appendChild(row);
+  });
+}
+function addTask(){
+  const v = $('taskInput').value.trim(); if(!v) return;
+  state.tasks.push({id:uid(), text:v, done:false, doneAt:0});
+  $('taskInput').value = '';
+  save(); renderTasks(); $('taskInput').focus();
+}
+function toggleTask(id){
+  const t = state.tasks.find(x => x.id === id); if(!t) return;
+  if(t.done){ t.done = false; t.doneAt = 0; save(); renderTasks(); return; }
+  t.done = true; t.doneAt = Date.now(); save(); renderTasks();
+  scheduleTaskRemoval(id, TASK_TTL);
+}
+function scheduleTaskRemoval(id, delay){
+  setTimeout(() => {
+    const t = (state.tasks || []).find(x => x.id === id);
+    if(!t || !t.done) return;
+    const row = $('taskList') && $('taskList').querySelector('[data-id="' + id + '"]');
+    if(row){ row.classList.add('leaving'); setTimeout(() => removeTask(id), 360); }
+    else removeTask(id);
+  }, delay);
+}
+function removeTask(id){ state.tasks = (state.tasks || []).filter(x => x.id !== id); save(); renderTasks(); }
+function initTaskTimers(){
+  const now = Date.now();
+  (state.tasks || []).slice().forEach(t => {
+    if(t.done && t.doneAt){
+      const left = TASK_TTL - (now - t.doneAt);
+      if(left <= 0) removeTask(t.id); else scheduleTaskRemoval(t.id, left);
+    }
+  });
+}
+
+/* ---------- Level guide ---------- */
+function renderGuide(){
+  const list = $('guideList'); if(!list) return;
+  list.innerHTML = STATS.map(m =>
+    `<div class="guide-row">
+       <div class="guide-name">${m.label}</div>
+       <div class="guide-field">
+         <textarea class="guide-text" data-key="${m.key}" rows="2" placeholder="Например: за тренировку +1…">${esc(state.levelGuide[m.key] || '')}</textarea>
+         <button class="mini del guide-del" data-key="${m.key}" title="Очистить">🗑</button>
+       </div>
+     </div>`
+  ).join('');
+  list.querySelectorAll('.guide-text').forEach(t => {
+    t.addEventListener('input', () => { state.levelGuide[t.dataset.key] = t.value; save(); });
+  });
+  list.querySelectorAll('.guide-del').forEach(b => {
+    b.onclick = () => { state.levelGuide[b.dataset.key] = ''; save(); renderGuide(); };
+  });
+}
+
+/* ---------- Calendar events ---------- */
+let eventDateKey = null;
+function openEventModal(dateKey){
+  eventDateKey = dateKey;
+  const ev = state.calendarEvents[dateKey] || '';
+  $('eventModalTitle').textContent = dateKeyHuman(dateKey);
+  $('eventText').value = ev;
+  $('eventDelete').hidden = !ev;
+  $('eventModal').hidden = false;
+  setTimeout(() => $('eventText').focus(), 30);
+}
+function saveEvent(){
+  const v = $('eventText').value.trim();
+  if(v) state.calendarEvents[eventDateKey] = v; else delete state.calendarEvents[eventDateKey];
+  save(); renderCalendar(); closeEventModal();
+}
+function deleteEventNote(){ delete state.calendarEvents[eventDateKey]; save(); renderCalendar(); closeEventModal(); }
+function closeEventModal(){ $('eventModal').hidden = true; eventDateKey = null; }
+
+/* ---------- Chart + export ---------- */
+function renderChart(){
+  const host = $('chart'); if(!host) return;
+  const maxStat = Math.max(1, ...STATS.map(m => state.stats[m.key] || 0));
+  const bars = STATS.map(m => {
+    const v = state.stats[m.key] || 0, w = Math.round(v / maxStat * 100);
+    return `<div class="bc-row"><span class="bc-name">${m.label}</span><div class="bc-track"><div class="bc-fill" style="width:${w}%"></div></div><span class="bc-val">${v}</span></div>`;
+  }).join('');
+  const hist = [...state.history].filter(h => h.date).sort((a,b) => a.date < b.date ? -1 : 1).slice(-14);
+  let lineHtml;
+  if(!hist.length){
+    lineHtml = '<div class="empty">Пока нет данных по дням. Отмечайте здоровье и энергию — здесь появится график.</div>';
+  } else {
+    const W=320,H=150,padL=20,padR=8,padT=10,padB=22,n=hist.length;
+    const xFor = i => padL + (n===1 ? (W-padL-padR)/2 : (i/(n-1))*(W-padL-padR));
+    const yFor = v => padT + (1 - (v||0)/10)*(H-padT-padB);
+    const ptsH = hist.map((d,i) => xFor(i).toFixed(1)+','+yFor(d.health).toFixed(1)).join(' ');
+    const ptsE = hist.map((d,i) => xFor(i).toFixed(1)+','+yFor(d.mana).toFixed(1)).join(' ');
+    const grid = [0,5,10].map(v => { const y=yFor(v).toFixed(1); return '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" class="grid"/><text x="2" y="'+(+y+3).toFixed(1)+'" class="ax">'+v+'</text>'; }).join('');
+    const dots = (key,cls) => hist.map((d,i) => '<circle cx="'+xFor(i).toFixed(1)+'" cy="'+yFor(d[key]).toFixed(1)+'" r="2.6" class="dot '+cls+'"/>').join('');
+    const xlab = i => '<text x="'+xFor(i).toFixed(1)+'" y="'+(H-6)+'" class="ax xl">'+(+hist[i].date.split('-')[2])+'</text>';
+    let labels = xlab(0); if(n>1) labels += xlab(n-1); if(n>3) labels += xlab(Math.floor((n-1)/2));
+    lineHtml = '<div class="chart-legend"><span class="lg h">❤ Здоровье</span><span class="lg e">⚡ Энергия</span></div>' +
+      '<svg viewBox="0 0 '+W+' '+H+'" class="line-chart" preserveAspectRatio="xMidYMid meet">' +
+      grid + '<polyline points="'+ptsE+'" class="ln e"/><polyline points="'+ptsH+'" class="ln h"/>' +
+      dots('mana','e') + dots('health','h') + labels + '</svg>';
+  }
+  host.innerHTML = '<div class="chart-sub">Навыки</div><div class="bar-chart">' + bars + '</div>' +
+    '<div class="chart-sub">Здоровье и энергия по дням</div>' + lineHtml;
+}
+function downloadFile(name, content, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function exportJson(){ downloadFile('moi-hroniki-backup.json', JSON.stringify(state, null, 2), 'application/json'); }
+function exportCsv(){
+  const rows = [['Дата','Здоровье','Энергия','Настроение','Комментарий']];
+  [...state.history].filter(h => h.date).sort((a,b) => a.date < b.date ? -1 : 1).forEach(h => {
+    const m = MOODS.find(x => x.key === h.mood);
+    rows.push([h.date, h.health, h.mana, m ? m.label : '', (h.comment || '').replace(/\s+/g, ' ')]);
+  });
+  const csv = '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+  downloadFile('moi-hroniki-istoriya.csv', csv, 'text/csv;charset=utf-8');
+}
+function importData(file){
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try{
+      const obj = JSON.parse(e.target.result);
+      if(!obj || typeof obj !== 'object') throw 0;
+      const d = defaultState();
+      state = Object.assign(d, obj, {
+        stats: Object.assign(d.stats, obj.stats || {}),
+        levelGuide: Object.assign(d.levelGuide, obj.levelGuide || {}),
+        calendarEvents: obj.calendarEvents || {},
+        tasks: Array.isArray(obj.tasks) ? obj.tasks : []
+      });
+      save();
+      if($('comment')) $('comment').value = state.comment || '';
+      renderClock(); renderCalendar(); renderAll(); initTaskTimers();
+      alert('Данные успешно загружены.');
+    }catch(err){ alert('Не удалось прочитать файл — он повреждён или не того формата.'); }
+  };
+  r.readAsText(file);
+}
+
 /* ---------- Wire up ---------- */
 $('actStat').innerHTML = STATS.map(s=>`<option value="${s.key}">${s.label}</option>`).join('');
 $('actAdd').onclick = addActivity;
@@ -692,13 +955,25 @@ $('itemCancel').onclick = closeItemModal;
 $('itemModal').addEventListener('click', e => { if(e.target === $('itemModal')) closeItemModal(); });
 $('itemName').addEventListener('keydown', e => { if(e.key === 'Enter') saveItem(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('itemModal').hidden) closeItemModal(); });
+$('taskAdd').onclick = addTask;
+$('taskInput').addEventListener('keydown', e => { if(e.key === 'Enter') addTask(); });
+$('eventSave').onclick = saveEvent;
+$('eventDelete').onclick = deleteEventNote;
+$('eventCancel').onclick = closeEventModal;
+$('eventModal').addEventListener('click', e => { if(e.target === $('eventModal')) closeEventModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('eventModal').hidden) closeEventModal(); });
+$('exportJson').onclick = exportJson;
+$('exportCsv').onclick = exportCsv;
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').addEventListener('change', e => importData(e.target.files[0]));
 
 /* ---------- Init ---------- */
-function renderAll(){ renderStats(); renderBars(); renderMood(); renderActivities(); renderHistory(); renderInventory(); renderPortrait(); }
+function renderAll(){ renderStats(); renderBars(); renderMood(); renderActivities(); renderHistory(); renderInventory(); renderPortrait(); renderTasks(); renderGuide(); renderChart(); }
 buildEmbers();
 touchHistory();          // ensure today's snapshot exists
 save();
 renderClock(); renderCalendar(); renderAll();
+initTaskTimers();
 setInterval(renderClock, 1000);
 </script>
 </body>
