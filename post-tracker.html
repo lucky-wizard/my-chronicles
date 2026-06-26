@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Постинг-трекер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070c1a;
+  --surface: #0b1525;
+  --card: #0f1d35;
+  --card-hover: #132240;
+  --border: #172d50;
+  --border-mid: #1e3d6b;
+  --border-light: #2a5490;
+  --blue: #3b82f6;
+  --blue-bright: #60a5fa;
+  --blue-glow: rgba(59,130,246,0.15);
+  --blue-muted: #1d3a6e;
+  --text: #ddeeff;
+  --text-muted: #7aa8d4;
+  --text-dim: #3d6490;
+  --success: #22c55e;
+  --success-dim: rgba(34,197,94,0.12);
+  --danger: #ef4444;
+  --danger-dim: rgba(239,68,68,0.1);
+  --warning: #f59e0b;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 8px 32px rgba(0,5,30,0.6);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 20% -10%, rgba(37,99,235,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(59,130,246,0.08) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── TOPBAR ─────────────────────────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(7,12,26,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-logo svg { opacity: 0.9; }
+
+.topbar h1 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--blue-bright);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sync-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 11px;
+  white-space: nowrap;
+}
+
+.sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.sync-dot.synced  { background: var(--success); }
+.sync-dot.syncing { background: var(--warning); animation: blink 0.9s infinite; }
+.sync-dot.error   { background: var(--danger); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 0 rgba(59,130,246,0);
+}
+.btn-primary:hover {
+  background: var(--blue-bright);
+  color: var(--bg);
+  box-shadow: 0 0 16px rgba(59,130,246,0.35);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--card); color: var(--text); border-color: var(--border-mid); }
+
+.btn-settings {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 7px 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s;
+}
+.btn-settings:hover { background: var(--card); color: var(--text); border-color: var(--border-mid); }
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+.icon-btn:hover { background: var(--card-hover); color: var(--text-muted); }
+.icon-btn.danger:hover { background: var(--danger-dim); color: var(--danger); }
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 20px;
+}
+
+.sections-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 780px) {
+  .topbar { padding: 12px 16px; }
+  .page { padding: 18px 14px; }
+  .sections-grid { grid-template-columns: 1fr; gap: 18px; }
+  .sync-pill span { display: none; }
+  .topbar h1 { font-size: 0.9rem; }
+}
+
+/* ── SECTION ─────────────────────────────────────── */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--blue-glow);
+  gap: 12px;
+}
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--blue-bright);
+}
+
+.section-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── GROUP CARD ─────────────────────────────────── */
+.group-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.group-card:focus-within { border-color: var(--border-mid); }
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.group-drag {
+  color: var(--text-dim);
+  cursor: grab;
+  flex-shrink: 0;
+  padding: 2px;
+}
+
+.group-name {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  outline: none;
+  min-width: 0;
+}
+.group-name::placeholder { color: var(--text-dim); font-weight: 400; }
+
+.group-posts {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.group-foot {
+  padding: 6px 14px 12px;
+}
+
+/* ── POST ROW ────────────────────────────────────── */
+.post-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.post-row:hover { border-color: var(--border-mid); }
+
+.post-label {
+  flex: 1;
+  font-size: 0.83rem;
+  color: var(--text);
+  line-height: 1.4;
+  transition: color 0.2s;
+  min-width: 0;
+}
+.post-label.done {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.post-platforms {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Custom checkbox */
+.plat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.plat-cb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.plat-cb:checked {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.plat-cb:checked::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg);
+}
+
+.plat-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.remove-vk {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  padding: 1px 3px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: all 0.15s;
+  margin-left: -2px;
+}
+.remove-vk:hover { color: var(--danger); background: var(--danger-dim); }
+
+.del-post {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dim);
+  padding: 3px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.post-row:hover .del-post { opacity: 1; }
+.del-post:hover { color: var(--danger); background: var(--danger-dim); }
+
+/* ── ADD POST FORM ───────────────────────────────── */
+.add-post-trigger {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 2px;
+  border-radius: 5px;
+  transition: all 0.15s;
+}
+.add-post-trigger:hover { color: var(--blue-bright); }
+
+.add-post-form {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--surface);
+  border: 1px dashed var(--border-mid);
+  border-radius: 7px;
+}
+
+.add-post-form input[type="date"] {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.83rem;
+  outline: none;
+  cursor: pointer;
+  min-width: 0;
+}
+.add-post-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6) sepia(1) saturate(3) hue-rotate(185deg);
+  cursor: pointer;
+}
+
+.mini-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 5px;
+  transition: all 0.15s;
+}
+.mini-btn.ok  { color: var(--success); }
+.mini-btn.ok:hover  { background: var(--success-dim); }
+.mini-btn.cancel { color: var(--text-dim); }
+.mini-btn.cancel:hover { background: var(--card-hover); }
+
+/* ── EMPTY ───────────────────────────────────────── */
+.empty-hint {
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.all-posted {
+  font-size: 0.78rem;
+  color: var(--success);
+  opacity: 0.7;
+  padding: 4px 0 2px;
+}
+
+/* ── SETTINGS MODAL ──────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.overlay.hidden { display: none; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow);
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--blue-bright);
+  margin-bottom: 6px;
+}
+.modal-sub {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.field {
+  margin-bottom: 18px;
+}
+.field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 7px;
+}
+.field-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.88rem;
+  padding: 10px 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field-input:focus { border-color: var(--blue); }
+.field-input::placeholder { color: var(--text-dim); }
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.field-hint a { color: var(--blue-bright); text-decoration: none; }
+.field-hint a:hover { text-decoration: underline; }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.modal-error {
+  font-size: 0.8rem;
+  color: var(--danger);
+  margin-top: 12px;
+  display: none;
+}
+
+/* ── TOAST ───────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 22px;
+  right: 20px;
+  z-index: 400;
+  background: var(--card);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  padding: 11px 17px;
+  font-size: 0.83rem;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.28s cubic-bezier(0.34,1.4,0.64,1);
+  pointer-events: none;
+  max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok   { border-color: var(--success); color: var(--success); }
+.toast.err  { border-color: var(--danger); color: var(--danger); }
+
+/* ── SCROLLBAR ───────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Settings overlay -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-title">Синхронизация через GitHub Gist</div>
+    <div class="modal-sub">Данные хранятся в приватном Gist — синхронизация между телефоном и компьютером работает автоматически.</div>
+
+    <div class="field">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" class="field-input" id="fi-token" placeholder="ghp_xxxxxxxxxxxxxxxx" autocomplete="off">
+      <div class="field-hint">
+        Создай на <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank">github.com → Settings → Personal access tokens</a>. Права: только <strong>gist</strong>. Хранится в браузере, никуда не отправляется.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Gist ID <span style="font-weight:400;text-transform:none;letter-spacing:0">(оставь пустым → создадим новый)</span></label>
+      <input type="text" class="field-input" id="fi-gist" placeholder="abc1234def5678...">
+      <div class="field-hint">Найди в URL: gist.github.com/имя_пользователя/<strong>ID</strong></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveSettings()">Сохранить и загрузить</button>
+      <button class="btn btn-ghost" onclick="handleCreateGist()">Создать новый Gist</button>
+      <button class="btn btn-ghost" id="btn-cancel" onclick="closeModal()" style="display:none">Отмена</button>
+    </div>
+
+    <div class="modal-error" id="modal-err"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue-bright)" stroke-width="2">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      <line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/>
+    </svg>
+    <h1>Постинг-трекер</h1>
+  </div>
+  <div class="topbar-right">
+    <div class="sync-pill">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-text">не подключено</span>
+    </div>
+    <button class="btn-settings" onclick="openModal()" title="Настройки">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="page">
+  <div class="sections-grid">
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">Новые потоки</span>
+        <button class="btn btn-primary" style="padding:6px 13px;font-size:0.78rem" onclick="addGroup('new')">+ Группа</button>
+      </div>
+      <div class="section-body" id="sec-new">
+        <div class="empty-hint" id="empty-new">Нет групп.<br>Нажми «+ Группа» чтобы начать.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <span class="section-title">Старые потоки</span>
+        <button class="btn btn-primary" style="padding:6px 13px;font-size:0.78rem" onclick="addGroup('old')">+ Группа</button>
+      </div>
+      <div class="section-body" id="sec-old">
+        <div class="empty-hint" id="empty-old">Нет групп.<br>Нажми «+ Группа» чтобы начать.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let state = { sections: { new: [], old: [] } };
+let token  = localStorage.getItem('pt_tok') || '';
+let gistId = localStorage.getItem('pt_gid') || '';
+let saveTimer = null;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const MONTHS = ['января','февраля','марта','апреля','мая','июня',
+                'июля','августа','сентября','октября','ноября','декабря'];
+
+function fmtDate(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return `${d} ${MONTHS[m - 1]} ${y}`;
+}
+
+// Returns true if today >= post date (post should be hidden)
+function isPast(dateStr) {
+  if (!dateStr) return false;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return now >= new Date(y, m - 1, d);
+}
+
+function isDone(post) {
+  return post.hasVk ? (post.tgDone && post.vkDone) : post.tgDone;
+}
+
+function findGroup(sec, gid) {
+  return state.sections[sec].find(g => g.id === gid);
+}
+
+function findPost(sec, gid, pid) {
+  return findGroup(sec, gid)?.posts.find(p => p.id === pid);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ── SYNC STATUS ───────────────────────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-text').textContent = text;
+}
+
+// ── GITHUB GIST API ───────────────────────────────────────────────────────────
+async function gistFetch(method, body) {
+  const url = `https://api.github.com/gists/${gistId}`;
+  const res = await fetch(method === 'POST' ? 'https://api.github.com/gists' : url, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function loadGist() {
+  if (!token || !gistId) return false;
+  setSyncStatus('syncing', 'загрузка...');
+  try {
+    const data = await gistFetch('GET');
+    const raw = data.files?.['data.json']?.content;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state = parsed;
+      if (!state.sections) state.sections = { new: [], old: [] };
+      if (!Array.isArray(state.sections.new)) state.sections.new = [];
+      if (!Array.isArray(state.sections.old)) state.sections.old = [];
+    }
+    setSyncStatus('synced', 'синхронизировано');
+    return true;
+  } catch (e) {
+    setSyncStatus('error', 'ошибка загрузки');
+    return false;
+  }
+}
+
+async function saveGist() {
+  if (!token || !gistId) return;
+  setSyncStatus('syncing', 'сохранение...');
+  try {
+    await gistFetch('PATCH', {
+      files: { 'data.json': { content: JSON.stringify(state, null, 2) } }
+    });
+    setSyncStatus('synced', 'синхронизировано');
+  } catch (e) {
+    setSyncStatus('error', 'ошибка сохранения');
+    toast('Не удалось сохранить: ' + e.message, 'err');
+  }
+}
+
+async function createGist(tok) {
+  const res = await fetch('https://api.github.com/gists', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${tok}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      description: 'Постинг-трекер',
+      public: false,
+      files: { 'data.json': { content: JSON.stringify(state, null, 2) } }
+    })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return (await res.json()).id;
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveGist, 1600);
+}
+
+// ── SETTINGS MODAL ────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('fi-token').value = token;
+  document.getElementById('fi-gist').value = gistId;
+  document.getElementById('modal-err').style.display = 'none';
+  document.getElementById('btn-cancel').style.display = (token && gistId) ? '' : 'none';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+
+function showErr(msg) {
+  const el = document.getElementById('modal-err');
+  el.textContent = msg;
+  el.style.display = '';
+}
+
+async function saveSettings() {
+  const t = document.getElementById('fi-token').value.trim();
+  const g = document.getElementById('fi-gist').value.trim();
+  if (!t) { showErr('Введи токен'); return; }
+  if (!g) { showErr('Введи Gist ID или нажми «Создать новый Gist»'); return; }
+
+  token = t; gistId = g;
+  localStorage.setItem('pt_tok', token);
+  localStorage.setItem('pt_gid', gistId);
+
+  const ok = await loadGist();
+  if (ok) { closeModal(); renderAll(); toast('Данные загружены', 'ok'); }
+  else showErr('Не удалось загрузить. Проверь токен и Gist ID.');
+}
+
+async function handleCreateGist() {
+  const t = document.getElementById('fi-token').value.trim();
+  if (!t) { showErr('Сначала введи токен'); return; }
+  setSyncStatus('syncing', 'создание...');
+  try {
+    const id = await createGist(t);
+    token = t; gistId = id;
+    localStorage.setItem('pt_tok', token);
+    localStorage.setItem('pt_gid', gistId);
+    document.getElementById('fi-gist').value = gistId;
+    closeModal(); renderAll();
+    toast('Gist создан! Сохрани ID: ' + gistId, 'ok');
+    setSyncStatus('synced', 'синхронизировано');
+  } catch (e) {
+    showErr('Ошибка создания Gist. Проверь токен. (' + e.message + ')');
+    setSyncStatus('error', 'ошибка');
+  }
+}
+
+// Close modal on overlay click
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this && (token && gistId)) closeModal();
+});
+
+// ── DATA MUTATIONS ────────────────────────────────────────────────────────────
+function addGroup(sec) {
+  const g = { id: uid(), name: '', posts: [] };
+  state.sections[sec].push(g);
+  renderSection(sec);
+  scheduleSave();
+  setTimeout(() => {
+    document.querySelector(`[data-gid="${g.id}"] .group-name`)?.focus();
+  }, 40);
+}
+
+function deleteGroup(sec, gid) {
+  state.sections[sec] = state.sections[sec].filter(g => g.id !== gid);
+  renderSection(sec);
+  scheduleSave();
+}
+
+function updateName(sec, gid, val) {
+  const g = findGroup(sec, gid);
+  if (g) { g.name = val; scheduleSave(); }
+}
+
+function addPost(sec, gid, date) {
+  const g = findGroup(sec, gid);
+  if (!g || !date) return;
+  g.posts.push({ id: uid(), date, tgDone: false, vkDone: false, hasVk: true });
+  renderSection(sec);
+  scheduleSave();
+}
+
+function deletePost(sec, gid, pid) {
+  const g = findGroup(sec, gid);
+  if (!g) return;
+  g.posts = g.posts.filter(p => p.id !== pid);
+  renderSection(sec);
+  scheduleSave();
+}
+
+function toggleField(sec, gid, pid, field) {
+  const post = findPost(sec, gid, pid);
+  if (!post) return;
+  post[field] = !post[field];
+  // Fast DOM update — no full re-render needed
+  const labelEl = document.querySelector(`[data-pid="${pid}"] .post-label`);
+  if (labelEl) labelEl.classList.toggle('done', isDone(post));
+  scheduleSave();
+}
+
+function removeVk(sec, gid, pid) {
+  const post = findPost(sec, gid, pid);
+  if (!post) return;
+  post.hasVk = false; post.vkDone = false;
+  renderSection(sec);
+  scheduleSave();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderSection('new');
+  renderSection('old');
+}
+
+function renderSection(sec) {
+  const body  = document.getElementById('sec-' + sec);
+  const empty = document.getElementById('empty-' + sec);
+  body.querySelectorAll('.group-card').forEach(el => el.remove());
+
+  const groups = state.sections[sec] || [];
+  empty.style.display = groups.length ? 'none' : '';
+  groups.forEach(g => body.appendChild(buildGroupCard(sec, g)));
+}
+
+function buildGroupCard(sec, group) {
+  const card = document.createElement('div');
+  card.className = 'group-card';
+  card.dataset.gid = group.id;
+
+  // ── head ──
+  const head = document.createElement('div');
+  head.className = 'group-head';
+
+  const nameIn = document.createElement('input');
+  nameIn.type = 'text';
+  nameIn.className = 'group-name';
+  nameIn.placeholder = 'Название группы…';
+  nameIn.value = group.name;
+  nameIn.addEventListener('input', () => updateName(sec, group.id, nameIn.value));
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'icon-btn danger';
+  delBtn.title = 'Удалить группу';
+  delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+    <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+  delBtn.addEventListener('click', () => deleteGroup(sec, group.id));
+
+  head.appendChild(nameIn);
+  head.appendChild(delBtn);
+
+  // ── posts ──
+  const postsEl = document.createElement('div');
+  postsEl.className = 'group-posts';
+
+  const visible = group.posts.filter(p => !isPast(p.date));
+  const hidden  = group.posts.filter(p => isPast(p.date));
+
+  if (visible.length === 0 && hidden.length > 0) {
+    const note = document.createElement('div');
+    note.className = 'all-posted';
+    note.textContent = '✓ Все посты выложены';
+    postsEl.appendChild(note);
+  }
+
+  visible.forEach(post => postsEl.appendChild(buildPostRow(sec, group.id, post)));
+
+  // ── footer / add form ──
+  const foot = document.createElement('div');
+  foot.className = 'group-foot';
+
+  const form = document.createElement('div');
+  form.className = 'add-post-form';
+
+  const dateIn = document.createElement('input');
+  dateIn.type = 'date';
+
+  const okBtn = document.createElement('button');
+  okBtn.className = 'mini-btn ok';
+  okBtn.textContent = '✓ Добавить';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'mini-btn cancel';
+  cancelBtn.textContent = '✕';
+
+  const doAdd = () => {
+    if (dateIn.value) {
+      addPost(sec, group.id, dateIn.value);
+    }
+  };
+
+  okBtn.addEventListener('click', doAdd);
+  dateIn.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+  cancelBtn.addEventListener('click', () => {
+    form.style.display = 'none';
+    trigger.style.display = '';
+  });
+
+  form.appendChild(dateIn);
+  form.appendChild(okBtn);
+  form.appendChild(cancelBtn);
+
+  const trigger = document.createElement('button');
+  trigger.className = 'add-post-trigger';
+  trigger.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Добавить пост`;
+  trigger.addEventListener('click', () => {
+    trigger.style.display = 'none';
+    form.style.display = 'flex';
+    dateIn.focus();
+  });
+
+  foot.appendChild(form);
+  foot.appendChild(trigger);
+
+  card.appendChild(head);
+  card.appendChild(postsEl);
+  card.appendChild(foot);
+  return card;
+}
+
+function buildPostRow(sec, gid, post) {
+  const row = document.createElement('div');
+  row.className = 'post-row';
+  row.dataset.pid = post.id;
+
+  const label = document.createElement('div');
+  label.className = 'post-label' + (isDone(post) ? ' done' : '');
+  label.textContent = `Выложи пост ${fmtDate(post.date)}`;
+
+  const plats = document.createElement('div');
+  plats.className = 'post-platforms';
+
+  // TG
+  plats.appendChild(makePlatform('ТГ', post.tgDone, () => toggleField(sec, gid, post.id, 'tgDone')));
+
+  // VK
+  if (post.hasVk) {
+    plats.appendChild(makePlatform('ВК', post.vkDone, () => toggleField(sec, gid, post.id, 'vkDone')));
+
+    const rmVk = document.createElement('button');
+    rmVk.className = 'remove-vk';
+    rmVk.title = 'Убрать ВК';
+    rmVk.textContent = '✕вк';
+    rmVk.addEventListener('click', () => removeVk(sec, gid, post.id));
+    plats.appendChild(rmVk);
+  }
+
+  // Delete post
+  const del = document.createElement('button');
+  del.className = 'del-post';
+  del.title = 'Удалить пост';
+  del.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  del.addEventListener('click', () => deletePost(sec, gid, post.id));
+
+  row.appendChild(label);
+  row.appendChild(plats);
+  row.appendChild(del);
+  return row;
+}
+
+function makePlatform(name, checked, onChange) {
+  const lbl = document.createElement('label');
+  lbl.className = 'plat';
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.className = 'plat-cb';
+  cb.checked = checked;
+  cb.addEventListener('change', onChange);
+
+  const span = document.createElement('span');
+  span.className = 'plat-name';
+  span.textContent = name;
+
+  lbl.appendChild(cb);
+  lbl.appendChild(span);
+  return lbl;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  if (token && gistId) {
+    const ok = await loadGist();
+    if (ok) {
+      renderAll();
+      document.getElementById('btn-cancel').style.display = '';
+    } else {
+      openModal();
+    }
+  } else {
+    openModal();
+  }
+}
+
+// Save on page unload if dirty
+window.addEventListener('beforeunload', () => {
+  if (saveTimer) { clearTimeout(saveTimer); saveGist(); }
+});
+
+init();
+</script>
+</body>
+</html>
